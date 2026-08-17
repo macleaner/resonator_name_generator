@@ -1,0 +1,85 @@
+{
+  "generated": "2026-08-17",
+  "lists": {
+    "names": {
+      "file": "names.txt",
+      "description": "human given names from around the world",
+      "total": 76880,
+      "new_per_source": {
+        "wikidata": 74639,
+        "popular-by-country": 178,
+        "ssa": 2063
+      },
+      "sources": {
+        "wikidata": "https://qlever.dev/api/wikidata (Wikidata, CC0)",
+        "popular-by-country": "https://github.com/sigpwned/popular-names-by-country-dataset (CC0)",
+        "ssa": "https://github.com/hackerb9/ssa-baby-names (public domain)"
+      },
+      "excluded_by_blocklist": 67
+    },
+    "pet_names": {
+      "file": "pet_names.txt",
+      "description": "pet names that are not also human given names",
+      "total": 1250,
+      "new_per_source": {
+        "seattle-pets": 652,
+        "nyc-dogs": 598
+      },
+      "sources": {
+        "seattle-pets": "https://data.seattle.gov/resource/jguv-t9rb.csv (open data)",
+        "nyc-dogs": "https://data.cityofnewyork.us/resource/nu7n-tubp.csv (open data)"
+      },
+      "excluded_by_blocklist": 11
+    },
+    "nouns_en": {
+      "file": "nouns_en.txt",
+      "description": "whimsical English common nouns",
+      "total": 3062,
+      "new_per_source": {
+        "wikidata-en": 3062
+      },
+      "sources": {
+        "wikidata-en": "https://qlever.dev/api/wikidata (Wikidata, CC0)"
+      },
+      "excluded_by_blocklist": 13,
+      "restricted_to": "https://github.com/dwyl/english-words (Unlicense)",
+      "dropped_as_unattested": 4757
+    },
+    "nouns_es": {
+      "file": "nouns_es.txt",
+      "description": "whimsical Spanish common nouns",
+      "total": 1427,
+      "new_per_source": {
+        "wikidata-es": 1427
+      },
+      "sources": {
+        "wikidata-es": "https://qlever.dev/api/wikidata (Wikidata, CC0)"
+      },
+      "excluded_by_blocklist": 6,
+      "restricted_to": "https://github.com/lorenbrichter/Words (CC0)",
+      "dropped_as_unattested": 1247
+    },
+    "nouns_nl": {
+      "file": "nouns_nl.txt",
+      "description": "whimsical Dutch common nouns",
+      "total": 3072,
+      "new_per_source": {
+        "wikidata-nl": 3072
+      },
+      "sources": {
+        "wikidata-nl": "https://qlever.dev/api/wikidata (Wikidata, CC0)"
+      },
+      "excluded_by_blocklist": 7,
+      "restricted_to": "https://github.com/OpenTaal/opentaal-wordlist (Revised BSD / CC BY 3.0)",
+      "dropped_as_unattested": 2826
+    }
+  },
+  "filters": {
+    "length": [
+      3,
+      12
+    ],
+    "charset": "ASCII letters only, diacritics folded",
+    "blocklist": "tools/blocklist.txt, tools/blockpatterns.txt"
+  }
+}

@@ -1,0 +1,226 @@
+# Names excluded from data/names.txt.
+#
+# One entry per line, matched case-insensitively against the ASCII-folded name
+# (so "Jesús" is caught by "jesus"). Blank lines and #-comments are ignored.
+# See blockpatterns.txt for regex-based exclusions that cover spelling variants.
+#
+# The bar for inclusion here is: would this name be awkward, offensive, or read
+# as a statement if it were printed on a plot, in a log, or in a paper? Names
+# that are merely religious in origin (Maria, Christopher, Ali, Krishna, Ibrahim)
+# are deliberately NOT excluded -- they are ordinary, extremely common names.
+
+# --- Deities and divine names -------------------------------------------------
+god
+godhead
+allah
+yahweh
+jahweh
+jehovah
+elohim
+adonai
+hashem
+jesus
+christ
+jesuschrist
+messiah
+buddha
+baal
+moloch
+mammon
+satan
+lucifer
+beelzebub
+mephistopheles
+antichrist
+
+# --- Prophets and figures whose names are widely treated as sacred ------------
+# The many romanisations of Muhammad are also covered by blockpatterns.txt.
+muhammad
+muhammed
+muhamad
+muhamed
+mohammad
+mohammed
+mohamad
+mohamed
+mohammod
+mohammud
+muhammadu
+mahomet
+mahoma
+
+# --- Dictators, mass murderers, and notorious historical figures --------------
+adolf
+adolph
+adolphus
+hitler
+stalin
+lenin
+trotsky
+mussolini
+benito
+franco
+himmler
+goebbels
+goering
+eichmann
+mengele
+hess
+bormann
+saddam
+osama
+usama
+binladen
+gaddafi
+qaddafi
+khomeini
+duvalier
+bokassa
+ceausescu
+milosevic
+karadzic
+mladic
+pinochet
+videla
+suharto
+mobutu
+amin
+idi
+mao
+genghis
+chinggis
+tamerlane
+nero
+caligula
+commodus
+herod
+torquemada
+rasputin
+breivik
+dahmer
+manson
+kaczynski
+koresh
+jonestown
+
+# --- Political / religious movements and organisations -----------------------
+nazi
+nazism
+gestapo
+stasi
+isis
+isil
+daesh
+qaeda
+alqaeda
+taliban
+hamas
+hezbollah
+jihad
+crusade
+inquisition
+apartheid
+holocaust
+shoah
+genocide
+
+# --- Biblical / mythological figures with strongly negative connotations ------
+judas
+jezebel
+cain
+# Delilah and Salome are deliberately left in: both are in ordinary use as
+# given names, and the association is far weaker than for the entries above.
+
+# --- Slurs, profanity, and crude terms ---------------------------------------
+# Substring forms live in blockpatterns.txt; these are exact-match entries that
+# occasionally appear in scraped name lists.
+gook
+kike
+spic
+wop
+chink
+coon
+paki
+kaffir
+kafir
+gyp
+tranny
+shemale
+pedo
+pedophile
+rapist
+incest
+hooker
+whore
+slut
+bastard
+moron
+imbecile
+cretin
+spastic
+mongoloid
+
+# --- Ordinary names elsewhere that read as crude in English -------------------
+# Each of these is a real given name; they are excluded because an English
+# reader sees the slang word first, and these names will be printed on plots.
+# Randy, Gay, and Dong are deliberately kept: all three read as names first,
+# and Dong in particular is a common Vietnamese and Korean name.
+dick
+fanny
+willy
+snot
+
+# --- Not offensive, just not whimsical ----------------------------------------
+# Surfaced by the noun lists, which draw on Wikidata classes for vehicles,
+# plants, and species. Weapons of war, death, disease, and drugs all make poor
+# detector names, whatever language they arrive in.
+#
+# Kept deliberately: tank, submarine, onderzeeboot (a submarine is a machine, not
+# a weapon, and Tank is one of the most common affectionate dog names in the NYC
+# register); raket, which in Dutch is a rocket, a tennis racket, and arugula.
+gun
+missile
+misil
+torpedo
+bazooka
+bomber
+bommenwerper
+warship
+oorlogsschip
+disparo
+coffin
+doodskist
+hearse
+lijkwagen
+grave
+cancer
+cannabis
+hashish
+# Spanish "puto" is a slur, even though this entry arrived as the name of a
+# Filipino steamed rice cake.
+puto
+# Spanish for "black", a common pet name, but read as a racial term in English.
+negra
+
+# --- Body parts, bodily functions, drugs, weapons ----------------------------
+penis
+vagina
+anus
+scrotum
+testicle
+semen
+feces
+faeces
+urine
+diarrhea
+diarrhoea
+heroin
+cocaine
+crack
+meth
+fentanyl
+oxycontin
+napalm
+anthrax
+sarin
+zyklon

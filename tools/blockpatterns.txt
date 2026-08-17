@@ -1,0 +1,37 @@
+# Regex exclusions applied to the lowercased, ASCII-folded name.
+#
+# Patterns are matched with re.search, so anchor them (^ / $) unless a substring
+# match is genuinely what you want. Blank lines and #-comments are ignored.
+#
+# Prefer tools/blocklist.txt for individual names; use this file only where a
+# family of spellings needs to be covered at once. Every substring pattern here
+# has been checked against the built list for false positives -- if you add one,
+# re-run the build and read the reported sample of newly excluded names.
+
+# Romanisations of Muhammad: mohamed, mohammad, muhammed, mohammadu, ...
+^m[ou]h+[ae]m+[aeou]?d[ui]?$
+
+# Adolf / Adolph / Adolphus. This also drops the ordinary Spanish and French
+# names Adolfo and Adolphe; that seemed the safer trade for two names.
+^adolf
+^adolph
+
+# Bin Laden / Osama variants that survive token filtering.
+^(bin|ibn)laden$
+
+# Hitler-adjacent compounds.
+hitler
+
+# Unambiguous profanity and slurs as substrings. Deliberately narrow: short
+# fragments like "tit" or "ass" are omitted because they hit Titus, Tito,
+# Cassius, Vassilis, and many others.
+fuck
+cunt
+# ^nigg also catches Niggi and Niggl, Swiss German diminutives of Nikolaus.
+# They are genuine names, but an English reader will not read them that way.
+^nigg
+faggot
+motherf
+asshole
+dickhead
+bullshit

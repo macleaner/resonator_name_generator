@@ -1,0 +1,13 @@
+# Cached source downloads. The word lists under resonator_name_generator/data/
+# are the committed artefacts; the raw upstream files are re-fetchable with
+# `python tools/build_names.py --refresh`.
+build_cache/
+
+__pycache__/
+*.py[cod]
+.venv/
+
+# Build artefacts
+build/
+dist/
+*.egg-info/
