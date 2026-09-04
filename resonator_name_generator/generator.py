@@ -200,7 +200,28 @@ def _main(argv: Sequence[str] | None = None) -> int:
         action="store_true",
         help="allow the same name more than once",
     )
+    parser.add_argument(
+        "--coin",
+        type=int,
+        metavar="LENGTH",
+        help="coin pronounceable words of exactly LENGTH characters "
+        "instead of drawing from the word lists",
+    )
     args = parser.parse_args(argv)
+
+    if args.coin is not None:
+        if args.weight:
+            parser.error("--coin draws from no category, so -w does not apply")
+        from .syllables import random_strings
+
+        try:
+            for name in random_strings(
+                args.n, args.coin, unique=not args.repeats_ok, rng=args.seed
+            ):
+                print(name)
+        except ValueError as exc:
+            parser.error(str(exc))
+        return 0
 
     weights: dict[str, float] | None = None
     if args.weight:

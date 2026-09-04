@@ -56,6 +56,65 @@ To eyeball the output:
 python -m resonator_name_generator -n 10 -w nouns_nl=1
 ```
 
+## Coined names
+
+Instead of drawing a real word, you can have one made up — pronounceable, and
+exactly `n` characters long:
+
+```python
+from resonator_name_generator import random_string, random_strings
+
+random_string(6)      # 'Tavren'
+random_strings(4, 8)  # ['Manuhors', 'Socliepa', 'Candefla', 'Metagaba']
+```
+
+Same signature style as `random_names`: `unique=True` by default, plus `avoid=`
+and `rng=`. Useful when the array is big enough that the lists run dry, when
+every name has to be the same width in a legend or a filename, or when a name
+that is definitely nobody's is preferable.
+
+```bash
+python -m resonator_name_generator -n 10 --coin 7
+```
+
+### How it works
+
+A word is a run of syllables — *onset* (1–2 consonants, or nothing at the start
+of a word), *nucleus* (1–2 vowels), *coda* (0–2 consonants) — each drawn by
+weight from an English-ish inventory, so `br` and `st` are possible onsets and
+`bt` and `zk` are not.
+
+The length comes out exact without any retrying. The shortest syllable is 2
+characters and the next shortest is 3, and every integer above 1 is a sum of 2s
+and 3s, so one rule is enough: **never leave exactly one character to fill at a
+syllable boundary.** Each unit is drawn from the lengths still compatible with
+what remains, and the last syllable lands on the boundary exactly.
+
+What makes the result readable is mostly the junction rules. After a syllable
+that ends in a consonant, the next must start with a single one — that caps any
+consonant run at three. After one ending in a *stop*, that consonant must be a
+liquid, nasal, or glide (`Sidra`, `Abner`; never `Sonksest`). A two-consonant
+coda mid-word is restricted to the clusters English actually says, so the only
+three-consonant runs the generator can emit are `ndr`, `str`, `ckl`, `mpl` and
+26 others like them. Codas are weighted so three syllables in five end on their
+vowel, which is the difference between `Tavina` and `Tarvent` — and the
+difference is invisible at length 5 and unmissable at length 12, so tune that
+weight by reading long ones.
+
+Lengths of 5–9 read best. Below 4 there is no room for structure (`Kar`, `Bim`),
+and `random_strings(n, 2)` will raise once it has exhausted the ~200 words that
+exist at that length.
+
+### A note on safety
+
+Coined words pass under nobody's eye before they land on a plot, so
+`syllables.py` carries its own substring filter — separate from the build-time
+blocklist in `tools/`, which only ever sees the curated lists. It errs wide on
+purpose: there is no real word to protect, so a false positive costs one
+nonsense string swapped for another, and fragments too short to use against a
+real corpus (`ass`, `tit`) are fine here. It rejects about 1.4% of draws
+together with the quality filter. Extend `_UNSAFE` if something slips through.
+
 ## The word lists
 
 Five lists under `data/`, one word per line, sorted, ASCII-only. Keeping them
