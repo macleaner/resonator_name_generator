@@ -1,16 +1,21 @@
-"""Coin pronounceable nonsense words of an exact length.
+"""Pronounceable gibberish of an exact length.
 
 Where :mod:`~resonator_name_generator.generator` draws from curated word lists,
 this module makes words up::
 
-    >>> random_string(6)                    # doctest: +SKIP
+    >>> random_gibberish(6)                 # doctest: +SKIP
     'Tavren'
-    >>> random_strings(3, 8)                # doctest: +SKIP
-    ['Marilena', 'Sondrike', 'Beluthra']
+    >>> random_gibberish(9)                 # doctest: +SKIP
+    'Marilena'
 
-Useful when the arrays are large enough that the lists run dry, when every name
-has to be the same width for a plot legend or a filename, or simply when a name
-that is definitely not anybody's is preferable.
+It backs the ``gibberish`` category, so the usual way in is
+:func:`~resonator_name_generator.generator.random_names` with that category
+weighted; this function is the primitive underneath, for when a single word of
+a known length is all that is wanted.
+
+Gibberish earns its place when the arrays are large enough that the lists run
+dry, when every name has to be the same width for a plot legend or a filename,
+or simply when a name that is definitely not anybody's is preferable.
 
 How the length comes out exact
 ------------------------------
@@ -55,7 +60,7 @@ import random
 import re
 from typing import Container, Iterable, Mapping
 
-__all__ = ["MIN_LENGTH", "random_string", "random_strings"]
+__all__ = ["MIN_LENGTH", "random_gibberish"]
 
 #: Shorter than this there is no room for a syllable.
 MIN_LENGTH = 2
@@ -132,11 +137,11 @@ _SINGLE_ONSETS = frozenset(unit for unit in _ONSETS if len(unit) == 1)
 #: letter three times over, four consonants in a row, a doubled ``y``.
 _UGLY = re.compile(r"(.)\1\1|[^aeiouy]{4}|yy")
 
-# Coined words pass under nobody's eye before they land on a plot, so this list
-# is the only thing standing between the generator and an awkward figure
-# caption. Over-blocking costs nothing here -- there is no real word to protect,
-# only one nonsense string swapped for another -- so it errs wide, and short
-# fragments that would be unusable against a real corpus are fine.
+# Gibberish passes under nobody's eye before it lands on a plot, so this list is
+# the only thing standing between the generator and an awkward figure caption.
+# Over-blocking costs nothing here -- there is no real word to protect, only one
+# nonsense string swapped for another -- so it errs wide, and short fragments
+# that would be unusable against a real corpus are fine.
 _UNSAFE = re.compile(
     "|".join(
         (
@@ -228,7 +233,7 @@ def _onsets_after(coda: str) -> frozenset[str]:
     return allowed - {coda}
 
 
-def _coin(length: int, rng: random.Random) -> str:
+def _build(length: int, rng: random.Random) -> str:
     """Assemble one word of exactly ``length`` characters, lowercase."""
     parts: list[str] = []
     remaining = length
@@ -277,80 +282,32 @@ def _acceptable(word: str) -> bool:
     return not _UGLY.search(word) and not _UNSAFE.search(word)
 
 
-def _coin_acceptable(length: int, rng: random.Random) -> str:
+def _build_acceptable(length: int, rng: random.Random) -> str:
     for _ in range(1000):
-        word = _coin(length, rng)
+        word = _build(length, rng)
         if _acceptable(word):
             return word
     # Only reachable if the filters were edited into rejecting nearly everything.
-    raise RuntimeError(f"could not coin an acceptable word of length {length}")
+    raise RuntimeError(f"could not build an acceptable word of length {length}")
 
 
-def random_string(
+def random_gibberish(
     length: int = 6,
     *,
     rng: random.Random | int | None = None,
 ) -> str:
-    """Return one coined, pronounceable word of exactly ``length`` characters.
+    """Return one pronounceable gibberish word of exactly ``length`` characters.
 
     Capitalised, ASCII, no spaces -- the same shape as the words in the curated
-    lists, so the two can be mixed freely.
+    lists, so the two mix without looking sorted.
+
+    For more than one, and for uniqueness and mixing with real words, weight the
+    ``gibberish`` category in
+    :func:`~resonator_name_generator.generator.random_names` instead.
 
     :param length: the exact character count, at least :data:`MIN_LENGTH`.
     :param rng: a :class:`random.Random`, or an int seed, for reproducible draws.
     """
     if length < MIN_LENGTH:
         raise ValueError(f"length must be at least {MIN_LENGTH}, got {length}")
-    return _coin_acceptable(length, _resolve_rng(rng)).capitalize()
-
-
-def random_strings(
-    n: int,
-    length: int = 6,
-    *,
-    unique: bool = True,
-    rng: random.Random | int | None = None,
-    avoid: Iterable[str] = (),
-) -> list[str]:
-    """Return ``n`` coined words, distinct from each other by default.
-
-    :param n: how many words to return.
-    :param length: the exact character count of each, at least
-        :data:`MIN_LENGTH`.
-    :param unique: when true, no word is repeated and none appears in ``avoid``.
-    :param rng: a :class:`random.Random`, or an int seed, for reproducible draws.
-    :param avoid: names already in use, coined or drawn from the word lists.
-    :raises ValueError: if ``unique`` is set and the space for that ``length``
-        is too small to supply ``n`` distinct words -- realistic only for very
-        short words, since there are already millions at length 6.
-    """
-    if n < 0:
-        raise ValueError(f"n must not be negative, got {n}")
-    if length < MIN_LENGTH:
-        raise ValueError(f"length must be at least {MIN_LENGTH}, got {length}")
-    resolved = _resolve_rng(rng)
-    if not unique:
-        return [_coin_acceptable(length, resolved).capitalize() for _ in range(n)]
-
-    # Unlike the word lists there is no pool to shuffle, so uniqueness is by
-    # rejection. The space grows fast enough with length that collisions only
-    # bite at the very short end, and a run of misses that long means it is
-    # effectively exhausted rather than merely unlucky.
-    misses_allowed = 5000
-    seen = {name for name in avoid}
-    drawn: list[str] = []
-    misses = 0
-    while len(drawn) < n:
-        candidate = _coin_acceptable(length, resolved).capitalize()
-        if candidate in seen:
-            misses += 1
-            if misses >= misses_allowed:
-                raise ValueError(
-                    f"asked for {n} distinct words of length {length} but only "
-                    f"{len(drawn)} could be coined; try a longer length"
-                )
-            continue
-        misses = 0
-        seen.add(candidate)
-        drawn.append(candidate)
-    return drawn
+    return _build_acceptable(length, _resolve_rng(rng)).capitalize()

@@ -11,6 +11,8 @@ from resonator_name_generator import random_name, random_names
 random_name()                                  # 'Rosalind'
 random_name({"nouns_nl": 1})                   # 'Stroopwafel'
 random_names(4, {"names": 4, "pet_names": 1})  # ['Ilinca', 'Tortellini', ...]
+random_names(4, {"names": 3, "gibberish": 1})  # ['Ilinca', 'Tavren', ...]
+random_names(4, length=6)                      # ['Marnie', 'Kettle', ...]
 ```
 
 `random_names(n)` returns **distinct** names by default — two detectors sharing a
@@ -34,9 +36,13 @@ names only".
 | `nouns_en` | 3,062 | 0.4 | 4% |
 | `nouns_es` | 1,427 | 0.3 | 3% |
 | `nouns_nl` | 3,072 | 0.3 | 3% |
+| `gibberish` | ∞ | 0.0 | — |
 
 The default is tuned so a plot of a few dozen resonators reads as a list of
 names with the occasional `Stroopwafel`, rather than as a joke.
+`gibberish` is [made up rather than looked up](#pronounceable-gibberish) and is
+off by default; it sits in the table at zero because that is a more
+discoverable way to say so than leaving it out.
 
 **Weights are per category, not per word** — this is the whole reason the lists
 are kept separate. Each draw picks a category by weight, then a word uniformly
@@ -56,25 +62,53 @@ To eyeball the output:
 python -m resonator_name_generator -n 10 -w nouns_nl=1
 ```
 
-## Coined names
+### Length
 
-Instead of drawing a real word, you can have one made up — pronounceable, and
-exactly `n` characters long:
+Any draw can be held to a length, and it applies to the whole mix — the lists
+are filtered to the words that fit and any gibberish is generated to match, so
+the result is uniform in width whichever category each name came from:
 
 ```python
-from resonator_name_generator import random_string, random_strings
-
-random_string(6)      # 'Tavren'
-random_strings(4, 8)  # ['Manuhors', 'Socliepa', 'Candefla', 'Metagaba']
+random_names(4, length=6)        # ['Marnie', 'Kettle', 'Osbert', 'Zonira']
+random_names(4, length=(4, 6))   # ['Ilse', 'Marnie', 'Wafel', 'Soat']
 ```
 
-Same signature style as `random_names`: `unique=True` by default, plus `avoid=`
-and `rng=`. Useful when the array is big enough that the lists run dry, when
-every name has to be the same width in a legend or a filename, or when a name
-that is definitely nobody's is preferable.
+Pass an exact length or an inclusive `(min, max)` pair. A category with nothing
+of that length is dropped up front and its weight passes to the rest, rather
+than failing on whichever draw happened to land in it — a length that suits
+human names need not suit Dutch compounds. If *nothing* weighted can supply it,
+that raises `ValueError`.
+
+The curated lists hold 3 to 12 characters, and thin out fast at the ends: 1,188
+names are 3 letters and 264 are 12, against 17,810 at 6. So a narrow length is
+worth pairing with a weighted `gibberish`, which never runs out.
 
 ```bash
-python -m resonator_name_generator -n 10 --coin 7
+python -m resonator_name_generator -n 10 --length 6 -w names=3 -w gibberish=1
+python -m resonator_name_generator -n 10 --length 4-7
+```
+
+## Pronounceable gibberish
+
+The `gibberish` category is made up rather than looked up: pronounceable words
+of an exact length that are nobody's name. Weight it like any other category to
+salt the real words with invented ones —
+
+```python
+random_names(6, {"names": 1, "gibberish": 1}, length=6, rng=0)
+# ['Pradon', 'Reahus', 'Borles', 'Prachi', 'Saleta', 'Artaud']
+```
+
+Three of those are invented, and the point is that you have to check which.
+(`Pradon`, `Reahus`, and `Borles`.)
+
+It is off by default (weight `0.0`). For a single word without going through
+the weighting, `random_gibberish(length)` is the primitive underneath:
+
+```python
+from resonator_name_generator import random_gibberish
+
+random_gibberish(6)  # 'Tavren'
 ```
 
 ### How it works
@@ -101,13 +135,14 @@ vowel, which is the difference between `Tavina` and `Tarvent` — and the
 difference is invisible at length 5 and unmissable at length 12, so tune that
 weight by reading long ones.
 
-Lengths of 5–9 read best. Below 4 there is no room for structure (`Kar`, `Bim`),
-and `random_strings(n, 2)` will raise once it has exhausted the ~200 words that
-exist at that length.
+Lengths of 5–9 read best, which is also where about 90% of the real words sit,
+so that range is what an unweighted `length` gives you. Below 4 there is no room
+for structure (`Kar`, `Bim`), and the space is small enough to exhaust: asking
+for 5,000 distinct names at `length=3` raises after the ~3,200 that exist.
 
 ### A note on safety
 
-Coined words pass under nobody's eye before they land on a plot, so
+Gibberish passes under nobody's eye before it lands on a plot, so
 `syllables.py` carries its own substring filter — separate from the build-time
 blocklist in `tools/`, which only ever sees the curated lists. It errs wide on
 purpose: there is no real word to protect, so a false positive costs one
