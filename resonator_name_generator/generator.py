@@ -18,16 +18,16 @@ relative, so ``{"names": 8, "pet_names": 2}`` and ``{"names": 4, "pet_names": 1}
 mean the same thing, and a category left out of the dict is not drawn from at
 all.
 
-One category, ``gibberish``, is not a list but a generator: it makes up
+One category, ``syllabic_strings``, is not a list but a generator: it makes up
 pronounceable words that are nobody's name, and it is off by default. Weight it
 to salt the real words with invented ones::
 
-    >>> random_names(4, {"names": 3, "gibberish": 1})    # doctest: +SKIP
+    >>> random_names(4, {"names": 3, "syllabic_strings": 1})   # doctest: +SKIP
     ['Ilinca', 'Tavren', 'Aurangzeb', 'Socliepa']
 
 Every draw can also be held to a length, which applies to the whole mix -- the
-lists are filtered to the words that fit and the gibberish is generated to
-match, so the result is uniform in width whichever category each name came
+lists are filtered to the words that fit and the syllabic strings are generated
+to match, so the result is uniform in width whichever category each name came
 from::
 
     >>> random_names(3, length=6)                        # doctest: +SKIP
@@ -35,9 +35,9 @@ from::
     >>> random_names(3, length=(4, 6))                   # doctest: +SKIP
     ['Ilse', 'Marnie', 'Wafel']
 
-See :mod:`resonator_name_generator.syllables` for how the gibberish is built,
-and :mod:`resonator_name_generator.boring` for when a name is not wanted at all
-and a numbered ``R0001`` will do.
+See :mod:`resonator_name_generator.syllables` for how a syllabic string is
+built, and :mod:`resonator_name_generator.boring` for when a name is not wanted
+at all and a numbered ``R0001`` will do.
 """
 
 from __future__ import annotations
@@ -48,13 +48,13 @@ from importlib.resources import files
 from typing import Iterable, Mapping, Sequence
 
 from .boring import DEFAULT_PREFIX, DEFAULT_WIDTH, boring_names
-from .syllables import MIN_LENGTH, random_gibberish
+from .syllables import MIN_LENGTH, random_syllabic_string
 
 __all__ = [
     "CATEGORIES",
-    "DEFAULT_GIBBERISH_LENGTH",
+    "DEFAULT_SYLLABIC_LENGTH",
     "DEFAULT_WEIGHTS",
-    "GIBBERISH",
+    "SYLLABIC_STRINGS",
     "WORD_LISTS",
     "random_name",
     "random_names",
@@ -62,34 +62,34 @@ __all__ = [
 ]
 
 #: The category that is generated rather than looked up.
-GIBBERISH = "gibberish"
+SYLLABIC_STRINGS = "syllabic_strings"
 
 #: The file-backed categories. Each is a file ``data/<category>.txt``.
 WORD_LISTS = ("names", "pet_names", "nouns_en", "nouns_es", "nouns_nl")
 
 #: Everything that can carry a weight.
-CATEGORIES = (*WORD_LISTS, GIBBERISH)
+CATEGORIES = (*WORD_LISTS, SYLLABIC_STRINGS)
 
 #: Mostly people, with roughly one draw in five being something sillier. Tuned so
 #: a plot of a few dozen resonators reads as a list of names with the occasional
 #: Stroopwafel, rather than as a joke.
 #:
-#: ``gibberish`` sits here at zero rather than being left out: the default mix is
-#: real words, and invented ones are something to opt into, but a weight of zero
-#: is a more discoverable way to say so than an absence.
+#: ``syllabic_strings`` sits here at zero rather than being left out: the default
+#: mix is real words, and invented ones are something to opt into, but a weight
+#: of zero is a more discoverable way to say so than an absence.
 DEFAULT_WEIGHTS = {
     "names": 8.0,
     "pet_names": 1.0,
     "nouns_en": 0.4,
     "nouns_es": 0.3,
     "nouns_nl": 0.3,
-    "gibberish": 0.0,
+    "syllabic_strings": 0.0,
 }
 
-#: How long gibberish is when no length was asked for. The real lists put about
-#: 90% of their words in this range, so unconstrained gibberish blends in rather
-#: than standing out as the long entry in every legend.
-DEFAULT_GIBBERISH_LENGTH = (4, 9)
+#: How long a syllabic string is when no length was asked for. The real lists put
+#: about 90% of their words in this range, so an unconstrained one blends in
+#: rather than standing out as the long entry in every legend.
+DEFAULT_SYLLABIC_LENGTH = (4, 9)
 
 
 def words(
@@ -97,8 +97,8 @@ def words(
 ) -> tuple[str, ...]:
     """Return the words in ``category``, loaded on first use and then cached.
 
-    :param category: one of :data:`WORD_LISTS`. ``gibberish`` is generated, not
-        stored, so it has no word list to return.
+    :param category: one of :data:`WORD_LISTS`. ``syllabic_strings`` is
+        generated, not stored, so it has no word list to return.
     :param length: an exact length, or a ``(min, max)`` pair, to return only the
         words that fit. ``None`` returns the whole list.
     """
@@ -108,10 +108,10 @@ def words(
 @lru_cache(maxsize=None)
 def _words(category: str, bounds: tuple[int, int] | None) -> tuple[str, ...]:
     # Cached on the *normalised* bounds so that 6 and (6, 6) share an entry.
-    if category == GIBBERISH:
+    if category == SYLLABIC_STRINGS:
         raise ValueError(
-            f"{GIBBERISH!r} is generated rather than stored and has no word "
-            f"list; call random_gibberish() for one word of it"
+            f"{SYLLABIC_STRINGS!r} are generated rather than stored and have no "
+            f"word list; call random_syllabic_string() for one of them"
         )
     if category not in WORD_LISTS:
         raise ValueError(
@@ -191,9 +191,9 @@ def _drawable(
     low, high = bounds
     able: dict[str, float] = {}
     for category, weight in live.items():
-        if category == GIBBERISH:
+        if category == SYLLABIC_STRINGS:
             # Nothing shorter than a syllable can be built, but anything longer
-            # can, so gibberish only drops out of a range below MIN_LENGTH.
+            # can, so they only drop out of a range below MIN_LENGTH.
             if high >= MIN_LENGTH:
                 able[category] = weight
         elif words(category, bounds):
@@ -211,14 +211,14 @@ def _pick(live: Mapping[str, float], rng: random.Random) -> str:
     return rng.choices(categories, weights=[live[c] for c in categories])[0]
 
 
-def _gibberish_length(bounds: tuple[int, int] | None, rng: random.Random) -> int:
-    low, high = bounds if bounds is not None else DEFAULT_GIBBERISH_LENGTH
+def _syllabic_length(bounds: tuple[int, int] | None, rng: random.Random) -> int:
+    low, high = bounds if bounds is not None else DEFAULT_SYLLABIC_LENGTH
     return rng.randint(max(low, MIN_LENGTH), high)
 
 
 def _draw(category: str, bounds: tuple[int, int] | None, rng: random.Random) -> str:
-    if category == GIBBERISH:
-        return random_gibberish(_gibberish_length(bounds, rng), rng=rng)
+    if category == SYLLABIC_STRINGS:
+        return random_syllabic_string(_syllabic_length(bounds, rng), rng=rng)
     return rng.choice(words(category, bounds))
 
 
@@ -235,7 +235,7 @@ def random_name(
         never drawn. Defaults to :data:`DEFAULT_WEIGHTS`.
     :param length: an exact length, or an inclusive ``(min, max)`` pair, that the
         name must fit. Applies to every category: the lists are filtered and the
-        gibberish is generated to match.
+        syllabic strings are generated to match.
     :param rng: a :class:`random.Random`, or an int seed, for reproducible draws.
     :raises ValueError: if no weighted category holds a word of that length.
     """
@@ -245,12 +245,12 @@ def random_name(
     return _draw(_pick(live, resolved), bounds, resolved)
 
 
-#: Consecutive gibberish words that all turn out to be duplicates before the
+#: Consecutive syllabic strings that all turn out to be duplicates before the
 #: category is treated as exhausted. There is no pool to watch empty, so this
 #: stands in for one; a run this long means the space for that length really is
 #: used up rather than merely unlucky, and it can only be paid once because the
 #: category is dropped afterwards.
-_GIBBERISH_MISSES = 5000
+_SYLLABIC_MISSES = 5000
 
 
 def random_names(
@@ -269,9 +269,9 @@ def random_names(
 
     :param n: how many names to return.
     :param weights: as for :func:`random_name`.
-    :param length: as for :func:`random_name`. Worth pairing with a weighted
-        ``gibberish``: a length narrow enough to make a legend line up is often
-        narrow enough to drain the lists, and gibberish does not run out.
+    :param length: as for :func:`random_name`. Worth pairing with weighted
+        ``syllabic_strings``: a length narrow enough to make a legend line up is
+        often narrow enough to drain the lists, and they do not run out.
     :param unique: when true, no name is repeated and none is drawn from
         ``avoid``. A category that runs out is dropped and the remaining weights
         carry on between them, so asking for more names than one small list holds
@@ -291,15 +291,15 @@ def random_names(
 
     # Shuffling each pool once and popping from the end draws without replacement
     # in O(1) per name, and stays correct as a pool empties -- which retrying on
-    # collisions does not, once a pool is nearly exhausted. Gibberish has no pool
-    # to shuffle and is handled by rejection below, but it reaches the same end:
-    # a category that cannot produce anything new is dropped, and the remaining
-    # weights carry on between them.
+    # collisions does not, once a pool is nearly exhausted. Syllabic strings have
+    # no pool to shuffle and are handled by rejection below, but it reaches the
+    # same end: a category that cannot produce anything new is dropped, and the
+    # remaining weights carry on between them.
     weighted = ", ".join(sorted(live))
     pools = {
         category: list(words(category, bounds))
         for category in live
-        if category != GIBBERISH
+        if category != SYLLABIC_STRINGS
     }
     for pool in pools.values():
         resolved.shuffle(pool)
@@ -315,10 +315,10 @@ def random_names(
             )
         category = _pick(live, resolved)
         picked = None
-        if category == GIBBERISH:
-            for _ in range(_GIBBERISH_MISSES):
-                candidate = random_gibberish(
-                    _gibberish_length(bounds, resolved), rng=resolved
+        if category == SYLLABIC_STRINGS:
+            for _ in range(_SYLLABIC_MISSES):
+                candidate = random_syllabic_string(
+                    _syllabic_length(bounds, resolved), rng=resolved
                 )
                 if candidate not in seen:
                     picked = candidate
@@ -329,8 +329,8 @@ def random_names(
                 candidate = pool.pop()
                 # A word can appear in two lists (a noun that is also a pet
                 # name), so uniqueness is checked across categories, not within
-                # one -- and gibberish is checked against the real words too, so
-                # an invented name never collides with a drawn one.
+                # one -- and a syllabic string is checked against the real words
+                # too, so an invented name never collides with a drawn one.
                 if candidate not in seen:
                     picked = candidate
         if picked is None:

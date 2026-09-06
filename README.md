@@ -8,13 +8,13 @@ that each resonator gets a memorable name instead of an index.
 ```python
 from resonator_name_generator import boring_names, random_name, random_names
 
-random_name()                                  # 'Rosalind'
-random_name({"nouns_nl": 1})                   # 'Stroopwafel'
-random_names(4, {"names": 4, "pet_names": 1})  # ['Ilinca', 'Tortellini', ...]
-random_names(4, {"names": 3, "gibberish": 1})  # ['Ilinca', 'Tavren', ...]
-random_names(4, length=6)                      # ['Marnie', 'Kettle', ...]
+random_name()                                         # 'Rosalind'
+random_name({"nouns_nl": 1})                          # 'Stroopwafel'
+random_names(4, {"names": 4, "pet_names": 1})         # ['Ilinca', 'Tortellini', ...]
+random_names(4, {"names": 3, "syllabic_strings": 1})  # ['Ilinca', 'Tavren', ...]
+random_names(4, length=6)                             # ['Marnie', 'Kettle', ...]
 
-boring_names(4)                                # ['R0001', 'R0002', ...]
+boring_names(4)                                       # ['R0001', 'R0002', ...]
 ```
 
 `random_names(n)` returns **distinct** names by default — two detectors sharing a
@@ -38,13 +38,13 @@ names only".
 | `nouns_en` | 3,062 | 0.4 | 4% |
 | `nouns_es` | 1,427 | 0.3 | 3% |
 | `nouns_nl` | 3,072 | 0.3 | 3% |
-| `gibberish` | ∞ | 0.0 | — |
+| `syllabic_strings` | ∞ | 0.0 | — |
 
 The default is tuned so a plot of a few dozen resonators reads as a list of
 names with the occasional `Stroopwafel`, rather than as a joke.
-`gibberish` is [made up rather than looked up](#pronounceable-gibberish) and is
-off by default; it sits in the table at zero because that is a more
-discoverable way to say so than leaving it out.
+`syllabic_strings` is [made up rather than looked
+up](#pronounceable-syllabic-strings) and is off by default; it sits in the table
+at zero because that is a more discoverable way to say so than leaving it out.
 
 **Weights are per category, not per word** — this is the whole reason the lists
 are kept separate. Each draw picks a category by weight, then a word uniformly
@@ -67,8 +67,8 @@ python -m resonator_name_generator -n 10 -w nouns_nl=1
 ### Length
 
 Any draw can be held to a length, and it applies to the whole mix — the lists
-are filtered to the words that fit and any gibberish is generated to match, so
-the result is uniform in width whichever category each name came from:
+are filtered to the words that fit and any syllabic string is generated to
+match, so the result is uniform in width whichever category each name came from:
 
 ```python
 random_names(4, length=6)        # ['Marnie', 'Kettle', 'Osbert', 'Zonira']
@@ -83,10 +83,10 @@ that raises `ValueError`.
 
 The curated lists hold 3 to 12 characters, and thin out fast at the ends: 1,188
 names are 3 letters and 264 are 12, against 17,810 at 6. So a narrow length is
-worth pairing with a weighted `gibberish`, which never runs out.
+worth pairing with weighted `syllabic_strings`, which never run out.
 
 ```bash
-python -m resonator_name_generator -n 10 --length 6 -w names=3 -w gibberish=1
+python -m resonator_name_generator -n 10 --length 6 -w names=3 -w syllabic_strings=1
 python -m resonator_name_generator -n 10 --length 4-7
 ```
 
@@ -134,14 +134,14 @@ python -m resonator_name_generator -n 10 --boring
 python -m resonator_name_generator -n 10 --boring kid --length 6
 ```
 
-## Pronounceable gibberish
+## Pronounceable syllabic strings
 
-The `gibberish` category is made up rather than looked up: pronounceable words
-of an exact length that are nobody's name. Weight it like any other category to
-salt the real words with invented ones —
+The `syllabic_strings` category is made up rather than looked up: pronounceable
+words of an exact length that are nobody's name. Weight it like any other
+category to salt the real words with invented ones —
 
 ```python
-random_names(6, {"names": 1, "gibberish": 1}, length=6, rng=0)
+random_names(6, {"names": 1, "syllabic_strings": 1}, length=6, rng=0)
 # ['Pradon', 'Reahus', 'Borles', 'Prachi', 'Saleta', 'Artaud']
 ```
 
@@ -149,12 +149,12 @@ Three of those are invented, and the point is that you have to check which.
 (`Pradon`, `Reahus`, and `Borles`.)
 
 It is off by default (weight `0.0`). For a single word without going through
-the weighting, `random_gibberish(length)` is the primitive underneath:
+the weighting, `random_syllabic_string(length)` is the primitive underneath:
 
 ```python
-from resonator_name_generator import random_gibberish
+from resonator_name_generator import random_syllabic_string
 
-random_gibberish(6)  # 'Tavren'
+random_syllabic_string(6)  # 'Tavren'
 ```
 
 ### How it works
@@ -188,7 +188,7 @@ for 5,000 distinct names at `length=3` raises after the ~3,200 that exist.
 
 ### A note on safety
 
-Gibberish passes under nobody's eye before it lands on a plot, so
+A syllabic string passes under nobody's eye before it lands on a plot, so
 `syllables.py` carries its own substring filter — separate from the build-time
 blocklist in `tools/`, which only ever sees the curated lists. It errs wide on
 purpose: there is no real word to protect, so a false positive costs one

@@ -6,11 +6,11 @@
     >>> random_names(4, {"names": 4, "nouns_nl": 1})      # doctest: +SKIP
     ['Ilinca', 'Stroopwafel', 'Aurangzeb', 'Marnie']
 
-One category is made up rather than looked up -- ``gibberish`` invents
+One category is made up rather than looked up -- ``syllabic_strings`` invents
 pronounceable words that are nobody's name -- and any draw can be held to a
 length, which applies to the real words and the invented ones alike:
 
-    >>> random_names(3, {"names": 3, "gibberish": 1}, length=6)  # doctest: +SKIP
+    >>> random_names(3, {"names": 3, "syllabic_strings": 1}, length=6)  # doctest: +SKIP
     ['Marnie', 'Tavren', 'Zonira']
 
 When a memorable name is the wrong answer, ``boring`` mode just counts:
@@ -22,8 +22,8 @@ When a memorable name is the wrong answer, ``boring`` mode just counts:
     ['kid0001', 'kid0002', 'kid0003']
 
 See :mod:`resonator_name_generator.generator` for how the category weighting
-works, :mod:`resonator_name_generator.syllables` for how the gibberish is put
-together, and :mod:`resonator_name_generator.boring` for the numbering.
+works, :mod:`resonator_name_generator.syllables` for how a syllabic string is
+put together, and :mod:`resonator_name_generator.boring` for the numbering.
 """
 
 from .boring import (
@@ -34,9 +34,9 @@ from .boring import (
 )
 from .generator import (
     CATEGORIES,
-    DEFAULT_GIBBERISH_LENGTH,
+    DEFAULT_SYLLABIC_LENGTH,
     DEFAULT_WEIGHTS,
-    GIBBERISH,
+    SYLLABIC_STRINGS,
     WORD_LISTS,
     random_name,
     random_names,
@@ -44,23 +44,23 @@ from .generator import (
 )
 from .syllables import (
     MIN_LENGTH,
-    random_gibberish,
+    random_syllabic_string,
 )
 
 __all__ = [
     "CATEGORIES",
-    "DEFAULT_GIBBERISH_LENGTH",
     "DEFAULT_PREFIX",
+    "DEFAULT_SYLLABIC_LENGTH",
     "DEFAULT_WEIGHTS",
     "DEFAULT_WIDTH",
-    "GIBBERISH",
     "MIN_LENGTH",
+    "SYLLABIC_STRINGS",
     "WORD_LISTS",
     "boring_name",
     "boring_names",
-    "random_gibberish",
     "random_name",
     "random_names",
+    "random_syllabic_string",
     "words",
 ]
 

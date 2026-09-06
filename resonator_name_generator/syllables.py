@@ -1,21 +1,21 @@
-"""Pronounceable gibberish of an exact length.
+"""Pronounceable syllabic strings of an exact length.
 
 Where :mod:`~resonator_name_generator.generator` draws from curated word lists,
 this module makes words up::
 
-    >>> random_gibberish(6)                 # doctest: +SKIP
+    >>> random_syllabic_string(6)           # doctest: +SKIP
     'Tavren'
-    >>> random_gibberish(9)                 # doctest: +SKIP
+    >>> random_syllabic_string(9)           # doctest: +SKIP
     'Marilena'
 
-It backs the ``gibberish`` category, so the usual way in is
+It backs the ``syllabic_strings`` category, so the usual way in is
 :func:`~resonator_name_generator.generator.random_names` with that category
 weighted; this function is the primitive underneath, for when a single word of
 a known length is all that is wanted.
 
-Gibberish earns its place when the arrays are large enough that the lists run
-dry, when every name has to be the same width for a plot legend or a filename,
-or simply when a name that is definitely not anybody's is preferable.
+A syllabic string earns its place when the arrays are large enough that the
+lists run dry, when every name has to be the same width for a plot legend or a
+filename, or simply when a name that is definitely not anybody's is preferable.
 
 How the length comes out exact
 ------------------------------
@@ -60,7 +60,7 @@ import random
 import re
 from typing import Container, Iterable, Mapping
 
-__all__ = ["MIN_LENGTH", "random_gibberish"]
+__all__ = ["MIN_LENGTH", "random_syllabic_string"]
 
 #: Shorter than this there is no room for a syllable.
 MIN_LENGTH = 2
@@ -137,8 +137,8 @@ _SINGLE_ONSETS = frozenset(unit for unit in _ONSETS if len(unit) == 1)
 #: letter three times over, four consonants in a row, a doubled ``y``.
 _UGLY = re.compile(r"(.)\1\1|[^aeiouy]{4}|yy")
 
-# Gibberish passes under nobody's eye before it lands on a plot, so this list is
-# the only thing standing between the generator and an awkward figure caption.
+# A syllabic string passes under nobody's eye before it lands on a plot, so this
+# list is the only thing standing between the generator and an awkward caption.
 # Over-blocking costs nothing here -- there is no real word to protect, only one
 # nonsense string swapped for another -- so it errs wide, and short fragments
 # that would be unusable against a real corpus are fine.
@@ -291,18 +291,18 @@ def _build_acceptable(length: int, rng: random.Random) -> str:
     raise RuntimeError(f"could not build an acceptable word of length {length}")
 
 
-def random_gibberish(
+def random_syllabic_string(
     length: int = 6,
     *,
     rng: random.Random | int | None = None,
 ) -> str:
-    """Return one pronounceable gibberish word of exactly ``length`` characters.
+    """Return one pronounceable syllabic string of exactly ``length`` characters.
 
     Capitalised, ASCII, no spaces -- the same shape as the words in the curated
     lists, so the two mix without looking sorted.
 
     For more than one, and for uniqueness and mixing with real words, weight the
-    ``gibberish`` category in
+    ``syllabic_strings`` category in
     :func:`~resonator_name_generator.generator.random_names` instead.
 
     :param length: the exact character count, at least :data:`MIN_LENGTH`.
