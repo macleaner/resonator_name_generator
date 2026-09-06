@@ -35,7 +35,9 @@ from::
     >>> random_names(3, length=(4, 6))                   # doctest: +SKIP
     ['Ilse', 'Marnie', 'Wafel']
 
-See :mod:`resonator_name_generator.syllables` for how the gibberish is built.
+See :mod:`resonator_name_generator.syllables` for how the gibberish is built,
+and :mod:`resonator_name_generator.boring` for when a name is not wanted at all
+and a numbered ``R0001`` will do.
 """
 
 from __future__ import annotations
@@ -45,6 +47,7 @@ from functools import lru_cache
 from importlib.resources import files
 from typing import Iterable, Mapping, Sequence
 
+from .boring import DEFAULT_PREFIX, DEFAULT_WIDTH, boring_names
 from .syllables import MIN_LENGTH, random_gibberish
 
 __all__ = [
@@ -363,6 +366,16 @@ def _main(argv: Sequence[str] | None = None) -> int:
         metavar="N|MIN-MAX",
         help="hold every name to N characters, or to the range MIN-MAX",
     )
+    parser.add_argument(
+        "--boring",
+        nargs="?",
+        const=DEFAULT_PREFIX,
+        metavar="PREFIX",
+        help=(
+            f"number them instead: {DEFAULT_PREFIX}0001, {DEFAULT_PREFIX}0002, "
+            f"... (PREFIX defaults to {DEFAULT_PREFIX!r})"
+        ),
+    )
     args = parser.parse_args(argv)
 
     length: int | tuple[int, int] | None = None
@@ -372,6 +385,35 @@ def _main(argv: Sequence[str] | None = None) -> int:
             length = (int(low), int(high)) if dash else int(low)
         except ValueError:
             parser.error(f"expected N or MIN-MAX, got {args.length!r}")
+
+    if args.boring is not None:
+        # Numbering is not a draw, so the knobs that shape one do not apply --
+        # better to say so than to accept them and quietly do nothing.
+        if args.weight:
+            parser.error("--boring draws from no category, so weights do nothing")
+        if args.repeats_ok:
+            parser.error("--boring names are numbered and so never repeat")
+        width = DEFAULT_WIDTH
+        if length is not None:
+            if not isinstance(length, int):
+                parser.error("--boring needs an exact --length, not a range")
+            width = length - len(args.boring)
+            if width < 1:
+                parser.error(
+                    f"--length {length} leaves no room for a counter after "
+                    f"{args.boring!r}"
+                )
+            if len(str(args.n)) > width:
+                parser.error(
+                    f"--length {length} fits {10 ** width - 1} names after "
+                    f"{args.boring!r}, not {args.n}"
+                )
+        try:
+            for name in boring_names(args.n, args.boring, width=width):
+                print(name)
+        except ValueError as exc:
+            parser.error(str(exc))
+        return 0
 
     weights: dict[str, float] | None = None
     if args.weight:

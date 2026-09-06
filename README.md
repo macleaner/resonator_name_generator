@@ -6,13 +6,15 @@ that each resonator gets a memorable name instead of an index.
 ## Usage
 
 ```python
-from resonator_name_generator import random_name, random_names
+from resonator_name_generator import boring_names, random_name, random_names
 
 random_name()                                  # 'Rosalind'
 random_name({"nouns_nl": 1})                   # 'Stroopwafel'
 random_names(4, {"names": 4, "pet_names": 1})  # ['Ilinca', 'Tortellini', ...]
 random_names(4, {"names": 3, "gibberish": 1})  # ['Ilinca', 'Tavren', ...]
 random_names(4, length=6)                      # ['Marnie', 'Kettle', ...]
+
+boring_names(4)                                # ['R0001', 'R0002', ...]
 ```
 
 `random_names(n)` returns **distinct** names by default — two detectors sharing a
@@ -86,6 +88,50 @@ worth pairing with a weighted `gibberish`, which never runs out.
 ```bash
 python -m resonator_name_generator -n 10 --length 6 -w names=3 -w gibberish=1
 python -m resonator_name_generator -n 10 --length 4-7
+```
+
+## Boring mode
+
+Sometimes a memorable name is the wrong answer — a wafer being screened, a
+figure that has to sort correctly, a colleague who wants to know which resonator
+is which without learning a vocabulary. `boring_names` just counts:
+
+```python
+from resonator_name_generator import boring_names
+
+boring_names(3)             # ['R0001', 'R0002', 'R0003']
+boring_names(3, "S")        # ['S0001', 'S0002', 'S0003']
+boring_names(3, "kid")      # ['kid0001', 'kid0002', 'kid0003']
+boring_names(3, start=7)    # ['R0007', 'R0008', 'R0009']
+```
+
+The prefix is taken verbatim — `kid` stays lowercase — and must not contain
+whitespace or end in a digit, since `R1` + `0001` would be ambiguous. The
+counter is zero-padded to a fixed **minimum** `width=4`; a batch that runs past
+that widens as a whole rather than in part, because uniform width is what makes
+the names line up in a legend and sort correctly in a directory listing:
+
+```python
+boring_names(3, start=9999)  # ['R09999', 'R10000', 'R10001']
+```
+
+`avoid=[...]` works as it does for a random draw, and matches **exactly**:
+nothing is parsed out of the entries, so `R1` does not stand in for `R0001`, and
+an entry that is not a name this call would have produced never matches.
+
+```python
+boring_names(3, avoid=["Rosalind", "R0001", "R0002"])  # ['R0003', 'R0004', 'R0005']
+```
+
+This is a *mode*, not a category: the order matters, nothing is drawn at random,
+and there is no weight that mixes it into the word lists — `R0003` between
+`Rosalind` and `Stroopwafel` would be neither one thing nor the other. So the
+CLI flag takes no weights, and `--length` (an exact one only) sets the width of
+the counter rather than filtering anything:
+
+```bash
+python -m resonator_name_generator -n 10 --boring
+python -m resonator_name_generator -n 10 --boring kid --length 6
 ```
 
 ## Pronounceable gibberish

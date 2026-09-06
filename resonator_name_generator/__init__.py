@@ -13,11 +13,25 @@ length, which applies to the real words and the invented ones alike:
     >>> random_names(3, {"names": 3, "gibberish": 1}, length=6)  # doctest: +SKIP
     ['Marnie', 'Tavren', 'Zonira']
 
+When a memorable name is the wrong answer, ``boring`` mode just counts:
+
+    >>> from resonator_name_generator import boring_names
+    >>> boring_names(3)
+    ['R0001', 'R0002', 'R0003']
+    >>> boring_names(3, "kid")
+    ['kid0001', 'kid0002', 'kid0003']
+
 See :mod:`resonator_name_generator.generator` for how the category weighting
-works, and :mod:`resonator_name_generator.syllables` for how the gibberish is
-put together.
+works, :mod:`resonator_name_generator.syllables` for how the gibberish is put
+together, and :mod:`resonator_name_generator.boring` for the numbering.
 """
 
+from .boring import (
+    DEFAULT_PREFIX,
+    DEFAULT_WIDTH,
+    boring_name,
+    boring_names,
+)
 from .generator import (
     CATEGORIES,
     DEFAULT_GIBBERISH_LENGTH,
@@ -36,10 +50,14 @@ from .syllables import (
 __all__ = [
     "CATEGORIES",
     "DEFAULT_GIBBERISH_LENGTH",
+    "DEFAULT_PREFIX",
     "DEFAULT_WEIGHTS",
+    "DEFAULT_WIDTH",
     "GIBBERISH",
     "MIN_LENGTH",
     "WORD_LISTS",
+    "boring_name",
+    "boring_names",
     "random_gibberish",
     "random_name",
     "random_names",
